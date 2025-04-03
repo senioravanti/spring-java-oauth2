@@ -1,0 +1,21 @@
+name: 'authorization-server'
+
+volumes:
+  authorization-server-postgres-data:
+
+services:
+  postgres:
+    image: 'postgres:17.2'
+    restart: 'unless-stopped'
+
+    container_name: 'authorization-server-postgres'
+
+    volumes:
+      - 'authorization-server-postgres-data:/var/lib/postgresql/data'
+
+    environment:
+      POSTGRES_DB: '${POSTGRES_DB}'
+      POSTGRES_PASSWORD: '${POSTGRES_PASSWORD}'
+
+    ports:
+      - '${DATABASE_PORT}:5432'

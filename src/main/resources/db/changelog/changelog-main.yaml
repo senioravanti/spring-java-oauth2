@@ -1,0 +1,13 @@
+databaseChangeLog:
+  # clients
+  - include:
+      file: 'db/changelog/v1/schema.sql'
+
+  # concensus
+  - include:
+      file: 'db/changelog/v2/schema.sql'
+  # users, authorities, users_authorities
+  - include:
+      file: 'db/changelog/v3/schema.sql'
+  - include:
+      file: 'db/changelog/v3/data.sql'

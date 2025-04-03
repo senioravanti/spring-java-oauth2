@@ -1,0 +1,6 @@
+app:
+  client:
+    secret: '${CLIENT_SECRET}'
+    client-id: '${CLIENT_ID}'
+    port: '${CLIENT_PORT}'
+    host: '${CLIENT_HOST}'
