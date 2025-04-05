@@ -6,6 +6,7 @@ import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 
 @Entity
@@ -15,9 +16,9 @@ import java.util.List;
 @AllArgsConstructor
 @Table(name = "users")
 public class UserEntity {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
     @Column(name = "user_id")
-    private Long id;
+    private UUID id;
 
     @Column(
         name = "user_username",

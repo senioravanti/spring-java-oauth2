@@ -41,7 +41,7 @@ public class InitClient {
                 .withId(UUID.randomUUID().toString())
                 .clientId(clientProperties.clientId())
                 .clientSecret(clientProperties.secret())
-                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                 .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
                 .redirectUri(String.format(
@@ -55,7 +55,7 @@ public class InitClient {
                 .scope(OidcScopes.OPENID)
                 .clientSettings(ClientSettings
                     .builder()
-                        .requireAuthorizationConsent(true)
+                        .requireAuthorizationConsent(false)
                     .build()
                 )
                 .build()

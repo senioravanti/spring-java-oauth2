@@ -15,6 +15,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -22,6 +23,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.session.SessionRegistry;
+import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.encrypt.KeyStoreKeyFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -37,7 +40,11 @@ import org.springframework.security.oauth2.server.authorization.settings.Authori
 import org.springframework.security.oauth2.server.authorization.token.*;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
+import org.springframework.security.web.header.HeaderWriterFilter;
+import org.springframework.security.web.session.HttpSessionEventPublisher;
+import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.security.KeyPair;
@@ -61,7 +68,6 @@ import java.util.UUID;
 @EnableWebSecurity(debug = true)
 @EnableMethodSecurity
 @RequiredArgsConstructor
-@Import(OAuth2AuthorizationServerConfiguration.class)
 public class SecurityConfig {
 
     private static String[] URL_WHITELIST = {
@@ -84,7 +90,7 @@ public class SecurityConfig {
     {
         // Применяет стандартные настройки фильтра безопасности, настр. HttpSecurity.
         // Приложение дает доступ к роутам только пользователям, прошедшим аутентификацию
-        OAuth2AuthorizationServerConfigurer authorizationServerConfigurer = OAuth2AuthorizationServerConfigurer.authorizationServer();
+        final var authorizationServerConfigurer = OAuth2AuthorizationServerConfigurer.authorizationServer();
 
         // Включаем OpenID Connect
         http
@@ -103,8 +109,9 @@ public class SecurityConfig {
         http
             .exceptionHandling(
                 ex -> ex
-                    .authenticationEntryPoint(
-                        new LoginUrlAuthenticationEntryPoint("/login")
+                    .defaultAuthenticationEntryPointFor(
+                        new LoginUrlAuthenticationEntryPoint("/login"),
+                        new MediaTypeRequestMatcher(MediaType.TEXT_HTML)
                     )
             )
             // Теперь сможем обрабатывать на сервере запросы на регистрацию новых пользователей. Реализуем, так сказать, функционал администратора.
@@ -117,16 +124,19 @@ public class SecurityConfig {
         return http.build();
     }
 
-    private UrlBasedCorsConfigurationSource corsConfigurationSource() {
-        final var corsConfiguration = new CorsConfiguration();
-        corsConfiguration.setAllowedOrigins(List.of("*"));
-        corsConfiguration.setAllowedMethods(List.of("OPTIONS", "HEAD", "GET", "POST", "PUT"));
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration config = new CorsConfiguration();
+        config.addAllowedOrigin("http://127.0.0.1:8081");
+        config.addAllowedHeader("*");
+        config.addAllowedMethod("GET");
+        config.addAllowedMethod("POST");
 
-        final var configurationSource = new UrlBasedCorsConfigurationSource();
-        configurationSource.registerCorsConfiguration("/**", corsConfiguration);
-        return configurationSource;
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+
+        return source;
     }
-
     /**
      * Настраиваем поведение auth server в том случае, когда он будет использоваться администратором как resourceserver
      */
@@ -136,7 +146,9 @@ public class SecurityConfig {
         throws Exception
     {
         http
-            .cors(AbstractHttpConfigurer::disable)
+            .cors(c -> c.configurationSource(corsConfigurationSource()))
+            .csrf(AbstractHttpConfigurer::disable)
+
             .authorizeHttpRequests(
                 authorize -> authorize
                     .anyRequest().authenticated()

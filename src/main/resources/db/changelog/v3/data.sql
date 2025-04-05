@@ -3,18 +3,20 @@
 --comment инициализирую таблицы users, authorities и user_authority
 -- Таблица users
 INSERT INTO users
-  (user_username, user_password)
+  (user_id, user_username, user_password)
 -- пароль p&6B
 VALUES
-  ('912fa990-b852-40e9-8d0b-d96289012389', '$2a$10$hydzoD578WtD/JLjxrUzpuHHHG2/4LepOdnG/I64NKCBwA.YbWGaG'
+  (uuid('466c8d94-28d7-402b-ac32-9e40748e908e'), 'jeff-wisoky',
+   '$2a$10$hydzoD578WtD/JLjxrUzpuHHHG2/4LepOdnG/I64NKCBwA.YbWGaG'
 ),
 -- пароль d63k!UO
 (
-  '299a6a3c-2f99-41e4-8923-08475c62c711', '$2a$10$54b2o/dZ1dPjFTd/E5BIr.cOHwA0yjaZaM99vEVU/h9Ov1DdfJOK.'
+  uuid('c2032f4f-4db2-4c42-b606-61b8594c1681'),
+   'morgan-kolovratov', '$2a$10$54b2o/dZ1dPjFTd/E5BIr.cOHwA0yjaZaM99vEVU/h9Ov1DdfJOK.'
 ),
 -- Пароль #ju0Z
 (
-  'b6f1178f-fdb1-434f-afbc-f5972714abbb', '$2a$10$fa.ZCHgQvl07mw7RWte8OeWZ.2Hqh79y/ArXxpyBcGN3X7Zvu/Jt.'
+  uuid('555ac44e-67ec-4f5d-a873-c1cee32bcb81'), 'antonio-harley-danger', '$2a$10$fa.ZCHgQvl07mw7RWte8OeWZ.2Hqh79y/ArXxpyBcGN3X7Zvu/Jt.'
 );
 
 -- Таблица authorities
@@ -31,11 +33,7 @@ VALUES (
 INSERT INTO user_authorities
   ( user_id, authority_id )
 VALUES (
-	(
-		SELECT user_id
-		FROM users
-		WHERE user_username = '912fa990-b852-40e9-8d0b-d96289012389'
-  ),
+	uuid('466c8d94-28d7-402b-ac32-9e40748e908e'),
   (
 		SELECT authority_id
 		FROM authorities
@@ -43,11 +41,7 @@ VALUES (
   )
 ),
 (
-  (
-    SELECT user_id
-    FROM users
-    WHERE user_username = '299a6a3c-2f99-41e4-8923-08475c62c711'
-  ),
+  uuid('c2032f4f-4db2-4c42-b606-61b8594c1681'),
   (
     SELECT authority_id
     FROM authorities
@@ -55,11 +49,7 @@ VALUES (
   )
 ),
 (
-  (
-    SELECT user_id
-    FROM users
-    WHERE user_username = 'b6f1178f-fdb1-434f-afbc-f5972714abbb'
-  ),
+  uuid('555ac44e-67ec-4f5d-a873-c1cee32bcb81'),
   (
     SELECT authority_id
     FROM authorities
